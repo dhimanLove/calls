@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:calls/pages/callpage.dart';
+import 'package:flutter/services.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -35,24 +36,14 @@ class _HomepageState extends State<Homepage> {
           color: primaryColor,
           size: 28,
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              'Video Call',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: primaryColor,
-                letterSpacing: 0.8,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'Zego Cloud Demo',
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-            ),
-          ],
+        title: Text(
+          'Video Call',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: primaryColor,
+            letterSpacing: 0.8,
+          ),
         ),
         centerTitle: true,
         actions: [
@@ -61,9 +52,13 @@ class _HomepageState extends State<Homepage> {
             onPressed: () {
               showAboutDialog(
                 context: context,
-                applicationName: 'Zego Cloud Video Call',
+                applicationName: 'Video Call',
                 applicationVersion: '1.0.0',
-                applicationIcon: const Icon(Icons.video_call, size: 40, color: Colors.blueAccent),
+                applicationIcon: const Icon(
+                  Icons.video_call,
+                  size: 40,
+                  color: Colors.blueAccent,
+                ),
                 children: [
                   const Text(
                     'This app demonstrates how to use Zego Cloud for video calling.',
@@ -84,12 +79,9 @@ class _HomepageState extends State<Homepage> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Center(
-          child:
-          Column(
+          child: Column(
             children: [
-              SizedBox(
-                height: 100,
-              ),
+              SizedBox(height: 100),
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -117,16 +109,30 @@ class _HomepageState extends State<Homepage> {
                     const SizedBox(height: 8),
                     Text(
                       'Enter your details below to start a video call',
-                      style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                     const SizedBox(height: 32),
 
                     // 👤 User ID Input
+
+                    // 👤 User ID Input
                     TextField(
                       controller: _userIdController,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(20),
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'[a-zA-Z0-9_]'),
+                        ), // allows alphanumerics & underscores
+                      ],
                       decoration: InputDecoration(
-                        labelText: 'Your User ID',
-                        prefixIcon: Icon(Icons.person_outline, color: primaryColor),
+                        labelText: 'Your User ID (max 20 chars)',
+                        prefixIcon: Icon(
+                          Icons.person_outline,
+                          color: primaryColor,
+                        ),
                         filled: true,
                         fillColor: Colors.grey.shade50,
                         contentPadding: const EdgeInsets.symmetric(
@@ -144,8 +150,13 @@ class _HomepageState extends State<Homepage> {
                     // 📞 Call ID Input
                     TextField(
                       controller: _callIdController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter
+                            .digitsOnly, // only numbers allowed
+                      ],
                       decoration: InputDecoration(
-                        labelText: 'Call ID',
+                        labelText: 'Call ID (numbers only)',
                         prefixIcon: Icon(
                           Icons.videocam_outlined,
                           color: primaryColor,
@@ -162,6 +173,7 @@ class _HomepageState extends State<Homepage> {
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 30),
 
                     // ✅ Join Call Button
@@ -181,19 +193,45 @@ class _HomepageState extends State<Homepage> {
                           return;
                         }
 
+                        if (userId.length > 20) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "User ID must be under 20 characters",
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
+                        if (!RegExp(r'^\d+$').hasMatch(callId)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "Call ID must contain only numbers",
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder:
                                 (context) =>
-                                Callpage(userId: userId, callId: callId),
+                                    Callpage(userId: userId, callId: callId),
                           ),
                         );
                       },
+
                       icon: const Icon(Icons.call),
                       label: const Text(
                         'Join Call',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
@@ -213,7 +251,7 @@ class _HomepageState extends State<Homepage> {
                 ),
               ),
             ],
-          )
+          ),
         ),
       ),
     );

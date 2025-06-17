@@ -18,7 +18,7 @@ class Callpage extends StatelessWidget {
       appID: Appinfo.appId,
       appSign: Appinfo.appSign,
       userID: userId,
-      userName: userId, // Use the same userId as userName to avoid duplicates
+      userName: userId,
       callID: callId,
       config: ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall(),
     );
